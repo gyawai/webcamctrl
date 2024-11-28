@@ -6,7 +6,7 @@
 #include <ncurses.h>
 #include "webcamctrl.h"
 
-void key_controller(int fd) {
+void key_controller(void) {
     int ch;
     initscr(); // init screen
     raw(); // no buffering
@@ -19,26 +19,26 @@ void key_controller(int fd) {
         switch(ch) {
           case KEY_UP:
             printf("up ");
-            move_relative(fd, 0, dxy);
+            tilt_relative_c(dxy);
             break;
           case KEY_DOWN:
-            move_relative(fd, 0, -1 * dxy);
+            tilt_relative_c(-1 * dxy);
             printf("down ");
             break;
           case KEY_LEFT:
-            move_relative(fd, dxy, 0);
+            pan_relative_c(dxy);
             printf("left ");
             break;
           case KEY_RIGHT:
-            move_relative(fd, -1 * dxy, 0);
+            pan_relative_c(-1 * dxy);
             printf("right ");
             break;
           case 'z':
-            zoom_relative(fd, dz);
+            zoom_relative_c(dz);
             printf("zoom ");
             break;
           case 'x':
-            zoom_relative(fd, -1 * dz);
+            zoom_relative_c(-1 * dz);
             printf("unzoom ");
             break;
           case 'q':

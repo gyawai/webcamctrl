@@ -23,7 +23,7 @@
   }
  */
 void
-pad_controller(int fd, const char *devname) {
+pad_controller(const char *devname) {
     fprintf(stderr, "Open gamepad %s ... ", devname);
     int procon = open(devname, O_RDONLY);
     if (procon == -1){
@@ -52,22 +52,22 @@ pad_controller(int fd, const char *devname) {
             break;
 
           case EV_KEY:
-            if (ev.code == BTN_TL2) zoom_relative(fd, -dz);
-            if (ev.code == BTN_TR2) zoom_relative(fd, dz);
+            if (ev.code == BTN_TL2) zoom_relative_c(-dz);
+            if (ev.code == BTN_TR2) zoom_relative_c(dz);
             // printf("type: %d  code: %d  value: %d\n", ev.type, ev.code, ev.value);
             break;
 
           case EV_ABS:
             // cross key
             dir = ev.value;
-            if (ev.code == ABS_HAT0X) move_relative(fd, dir * dxy, 0);
-            if (ev.code == ABS_HAT0Y) move_relative(fd, 0, dir * dxy);
+            if (ev.code == ABS_HAT0X) pan_relative_c(dir * dxy);
+            if (ev.code == ABS_HAT0Y) tilt_relative_c(dir * dxy);
 
             // left stick
             int val = ev.value / 1000;
             if (abs(val) > 3) { // ignore too small values
-                if (ev.code == ABS_X) move_relative(fd, -1 * val, 0);
-                if (ev.code == ABS_Y) move_relative(fd, 0, val);
+                if (ev.code == ABS_X) pan_relative_c(-1 * val);
+                if (ev.code == ABS_Y) tilt_relative_c(val);
                 printf("%s val:%d\n", ev.code == ABS_X ? " pan" : "tilt", val);
             }
             break;
