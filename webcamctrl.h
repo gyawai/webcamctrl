@@ -13,7 +13,7 @@ void camera_controller(const char *devname, in_port_t tcp_port);
 int setup_server(in_port_t port);
 int setup_client(char *hostname, in_port_t port);
 
-#define INDEV_DEFAULT "/dev/input/event19"
+#define INDEV_DEFAULT "key" // or device file name for gamepad e.g. "/dev/input/event19"
 #define OUTDEV_DEFAULT "/dev/obsbot"
 #define TCP_PORT_DEFAULT ((in_port_t)1234)
 #define TCP_PORT_STR_DEFAULT "1234"

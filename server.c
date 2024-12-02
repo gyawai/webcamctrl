@@ -5,11 +5,17 @@
 #include <fcntl.h>
 #include <netinet/in.h>
 #include <unistd.h>
+#include <sys/ioctl.h>
+#include <errno.h>
+#include <linux/v4l2-controls.h>
+#include <linux/videodev2.h>
 #include "utils.h"
 #include "webcamctrl.h"
 
 static int open_camera(const char *devname);
 static int recv_packet(SOCKET soc, CameraMovePkt *pktp);
+static int xioctl(int fd, int request, void *arg);
+static void move_camera(int fd, int type, int pan, int tilt, int zoom);
 
 int
 setup_server(in_port_t port)
@@ -54,11 +60,16 @@ camera_controller(const char *devname, in_port_t tcp_port) {
         while (true) {
             CameraMovePkt pkt;
             int nrecv = recv_packet(soc_client, &pkt);
+            if (nrecv == -1) {
+                fprintf(stderr, "Disconnected.\n");
+                break;
+            }
             if (nrecv == 0) {
                 break;
             }
             fprintf(stderr, "pan:%d  tile:%d  zoom:%d  type:%d\n",
                     pkt.pan, pkt.tilt, pkt.zoom, pkt.type);
+            move_camera(fd_camera, pkt.type, pkt.pan, pkt.tilt, pkt.zoom);
         }
         close(soc_client);
     }
@@ -76,6 +87,65 @@ open_camera(const char *devname) {
     }
     fprintf(stderr, "Opened.\n");
     return fd;
+}
+
+/*
+ * Move camera by the amount given for each direction (i.e. ptz).
+ * The 'type' can take 0:relative 1:absolute but for now this value is not used.
+ */
+static void
+move_camera(int fd, int type, int pan, int tilt, int zoom) {
+    struct v4l2_control gctrl;
+    struct v4l2_control sctrl;
+
+    // pan
+    if (pan != 0) {
+        gctrl.id = V4L2_CID_PAN_ABSOLUTE;
+        if (xioctl(fd, VIDIOC_G_CTRL, &gctrl) == -1) {
+            perror("get ioctl");
+        }
+        sctrl.id = V4L2_CID_PAN_ABSOLUTE;
+        sctrl.value = 3500 * pan + gctrl.value;
+        if (xioctl(fd, VIDIOC_S_CTRL, &sctrl) == -1) {
+            perror("set ioctl");
+        }
+    }
+
+    // tilt
+    if (tilt != 0) {
+        gctrl.id = V4L2_CID_TILT_ABSOLUTE;
+        if (xioctl(fd, VIDIOC_G_CTRL, &gctrl) == -1) {
+            perror("get ioctl");
+        }
+        sctrl.id = V4L2_CID_TILT_ABSOLUTE;
+        sctrl.value = 3500 * tilt + gctrl.value;
+        if (xioctl(fd, VIDIOC_S_CTRL, &sctrl) == -1) {
+            perror("set ioctl");
+        }
+    }
+
+    // zoom
+    if (zoom != 0) {
+        gctrl.id = V4L2_CID_ZOOM_ABSOLUTE;
+        if (xioctl(fd, VIDIOC_G_CTRL, &gctrl) == -1) {
+            perror("get ioctl");
+        }
+        sctrl.id = V4L2_CID_ZOOM_ABSOLUTE;
+        sctrl.value = zoom + gctrl.value;
+        if (sctrl.value <= 0) sctrl.value = 0;
+        if (xioctl(fd, VIDIOC_S_CTRL, &sctrl) == -1) {
+            perror("set ioctl");
+        }
+    }
+}
+
+static int
+xioctl(int fd, int request, void *arg) {
+    int r;
+    do {
+        r = ioctl(fd,request,arg);
+    } while (-1 == r && EINTR == errno);
+    return r;
 }
 
 /*
