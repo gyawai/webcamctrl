@@ -157,6 +157,25 @@ move_camera(int fd, int type, int pan, int tilt, int zoom) {
 static void
 reset_divelog(void) {
     fprintf(stderr, "#### reset dive log ####");
+    char *fname = "../streamer/var/depthlog.csv";
+#if 0
+    FILE* fp = fopen(fname, "w");
+    if (!fp) {
+      perror(fname);
+    }
+    else {
+      fclose(fp);
+      fprintf(stderr, "the file content cleared.");
+    }
+#else
+    int err = remove(fname);
+    if (err) {
+        perror(fname);
+    }
+    else {
+        fprintf(stderr, "the file removed.");
+    }
+#endif
 }
 
 
