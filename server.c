@@ -13,9 +13,10 @@
 #include "webcamctrl.h"
 
 static int open_camera(const char *devname);
-static int recv_packet(SOCKET soc, CameraMovePkt *pktp);
+static int recv_packet(SOCKET soc, Pkt *pktp);
 static int xioctl(int fd, int request, void *arg);
 static void move_camera(int fd, int type, int pan, int tilt, int zoom);
+static void reset_divelog(void);
 
 int
 setup_server(in_port_t port)
@@ -52,13 +53,13 @@ setup_server(in_port_t port)
 }
 
 void
-camera_controller(const char *devname, in_port_t tcp_port) {
+server_mainloop(const char *devname, in_port_t tcp_port) {
     int fd_camera = open_camera(devname);
     while (true) {
         fprintf(stderr, "Listening port %d ... ", tcp_port);
         SOCKET soc_client = setup_server(tcp_port);
         while (true) {
-            CameraMovePkt pkt;
+	    Pkt pkt;
             int nrecv = recv_packet(soc_client, &pkt);
             if (nrecv == -1) {
                 fprintf(stderr, "Disconnected.\n");
@@ -67,9 +68,23 @@ camera_controller(const char *devname, in_port_t tcp_port) {
             if (nrecv == 0) {
                 break;
             }
-            fprintf(stderr, "pan:%d  tile:%d  zoom:%d  type:%d\n",
-                    pkt.pan, pkt.tilt, pkt.zoom, pkt.type);
-            move_camera(fd_camera, pkt.type, pkt.pan, pkt.tilt, pkt.zoom);
+	    switch (pkt.type) {
+	    case 0:
+	        fprintf(stderr, "pan:%d  tile:%d  zoom:%d  type:%d\n",
+			pkt.camera.pan, pkt.camera.tilt, pkt.camera.zoom, pkt.camera.type);
+		move_camera(fd_camera, pkt.camera.type, pkt.camera.pan, pkt.camera.tilt, pkt.camera.zoom);
+		break;
+	    case 1:
+  	        fprintf(stderr, "reset?: %d\n", pkt.sensor.reset);
+		if (pkt.sensor.reset == 1) {
+		    reset_divelog();
+		}
+		break;
+
+	    default:
+	        fprintf(stderr, "ignore an undefined packet type: %d\n", pkt.type);
+		break;
+	    }
         }
         close(soc_client);
     }
@@ -139,6 +154,12 @@ move_camera(int fd, int type, int pan, int tilt, int zoom) {
     }
 }
 
+static void
+reset_divelog(void) {
+    fprintf(stderr, "#### reset dive log ####");
+}
+
+
 static int
 xioctl(int fd, int request, void *arg) {
     int r;
@@ -156,7 +177,7 @@ xioctl(int fd, int request, void *arg) {
  *
  */
 static int
-recv_packet(SOCKET soc, CameraMovePkt *pktp) {
+recv_packet(SOCKET soc, Pkt *pktp) {
     char buf[MAX_DATA_SIZE];
     int nrecvd = recv(soc, buf, sizeof(int), 0);
     if (nrecvd == -1) {

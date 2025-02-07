@@ -41,6 +41,10 @@ void key_controller(void) {
             zoom_relative_c(-1 * dz);
             printf("unzoom ");
             break;
+          case 'r':
+            reset_divelog_c();
+            printf("reset ");
+            break;
           case 'q':
             endwin(); // finalize screen
             exit(0);

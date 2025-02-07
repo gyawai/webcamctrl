@@ -6,39 +6,48 @@
 #include "webcamctrl.h"
 
 
-static int send_packet(CameraMovePkt *pktp);
+static int send_packet(Pkt *pktp);
 
 SOCKET Soc;
 
 void
 pan_relative_c(int val) {
-    CameraMovePkt pkt = {
-        .pan = val,
-        .tilt = 0,
-        .zoom = 0,
+    Pkt pkt = {
         .type = 0,
+	.camera = {
+	    .pan = val,
+	    .tilt = 0,
+	    .zoom = 0,
+	    .type = 0,
+	}
     };
     send_packet(&pkt);
 }
 
 void
 tilt_relative_c(int val) {
-    CameraMovePkt pkt = {
-        .pan = 0,
-        .tilt = val,
-        .zoom = 0,
+    Pkt pkt = {
         .type = 0,
+	.camera = {
+	    .pan = 0,
+	    .tilt = val,
+	    .zoom = 0,
+	    .type = 0,
+	}
     };
     send_packet(&pkt);
 }
 
 void
 zoom_relative_c(int val) {
-    CameraMovePkt pkt = {
-        .pan = 0,
-        .tilt = 0,
-        .zoom = val,
+    Pkt pkt = {
         .type = 0,
+	.camera = {
+	    .pan = 0,
+	    .tilt = 0,
+	    .zoom = val,
+	    .type = 0,
+	}
     };
     send_packet(&pkt);
 }
@@ -49,6 +58,16 @@ zoom_continuous_c(int val) {
     fprintf(stderr, "zoom_continuous_c() not implemented.\n");
 }
 
+void
+reset_divelog_c(void) {
+    Pkt pkt = {
+        .type = 1,
+	.sensor = {
+	    .reset = 1,
+	}
+    };
+    send_packet(&pkt);
+}
 
 int
 setup_client(char *hostname, in_port_t port)
@@ -84,9 +103,9 @@ setup_client(char *hostname, in_port_t port)
 
 
 static int
-send_packet(CameraMovePkt *pktp) {
+send_packet(Pkt *pktp) {
     char buf[MAX_DATA_SIZE];
-    int pktsize = sizeof(CameraMovePkt);
+    int pktsize = sizeof(Pkt);
     int bufsize = pktsize + sizeof(int);
     *(int *)buf = htonl(pktsize);
     memcpy(buf + sizeof(int), pktp, pktsize);

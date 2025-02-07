@@ -9,9 +9,10 @@ void pan_relative_c(int val);
 void tilt_relative_c(int val);
 void zoom_relative_c(int val);
 void zoom_continuous_c(int val);
-void camera_controller(const char *devname, in_port_t tcp_port);
+void server_mainloop(const char *devname, in_port_t tcp_port);
 int setup_server(in_port_t port);
 int setup_client(char *hostname, in_port_t port);
+void reset_divelog_c();
 
 #define INDEV_DEFAULT "key" // or device file name for gamepad e.g. "/dev/input/event19"
 #define OUTDEV_DEFAULT "/dev/obsbot"
@@ -21,10 +22,22 @@ int setup_client(char *hostname, in_port_t port);
 #define MAX_DATA_SIZE (128)
 
 typedef struct {
+  int reset;
+} SensorCmd;
+
+typedef struct {
     int pan;
     int tilt;
     int zoom;
     int type; // 0:relative 1:absolute
-} CameraMovePkt;
+} CameraCmd;
+
+typedef struct {
+  int type; // 0:camera  1:sensor
+  union {
+    CameraCmd camera;
+    SensorCmd sensor;
+  };
+} Pkt;
 
 #endif // __WEBCAMCTRL_H__

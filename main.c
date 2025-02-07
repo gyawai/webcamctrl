@@ -97,7 +97,7 @@ main(int argc, char **argv) {
         }
     }
     else if (args.is_server) {
-        camera_controller(args.outdev, args.tcp_port);
+      server_mainloop(args.outdev, args.tcp_port);
     }
     else {
         fprintf(stderr, "Either '--server' or '--client' must be specified.\n");
