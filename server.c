@@ -201,6 +201,7 @@ recv_packet(SOCKET soc, Pkt *pktp) {
     int nrecvd = recv(soc, buf, sizeof(int), 0);
     if (nrecvd == -1) {
         perror("recv_packet() failed.");
+	sleep(10);
         return -1;
     }
     if (nrecvd == 0) {
