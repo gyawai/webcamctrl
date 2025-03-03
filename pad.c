@@ -52,8 +52,17 @@ pad_controller(const char *devname) {
             break;
 
           case EV_KEY:
+	    /*
+	     * BTN_{TL,TR,TL2,TR2}: side buttons
+	     * BTN_START: plus button
+	     * BTN_SELECT: minus button
+	     * BTN_MODE: home button
+	     * BTN_Z: the button left to the home button
+	     */
             if (ev.code == BTN_TL2) zoom_relative_c(-dz);
             if (ev.code == BTN_TR2) zoom_relative_c(dz);
+            if (ev.code == BTN_MODE) setup_client((char *)NULL, (in_port_t)0);
+            if (ev.code == BTN_Z) reset_divelog_c();
             // printf("type: %d  code: %d  value: %d\n", ev.type, ev.code, ev.value);
             break;
 
@@ -63,6 +72,7 @@ pad_controller(const char *devname) {
             if (ev.code == ABS_HAT0X) pan_relative_c(dir * dxy);
             if (ev.code == ABS_HAT0Y) tilt_relative_c(dir * dxy);
 
+#if 0 // don't use left stick for now
             // left stick
             int val = ev.value / 1000;
             if (abs(val) > 3) { // ignore too small values
@@ -70,6 +80,7 @@ pad_controller(const char *devname) {
                 if (ev.code == ABS_Y) tilt_relative_c(val);
                 printf("%s val:%d\n", ev.code == ABS_X ? " pan" : "tilt", val);
             }
+#endif
             break;
 
           default:

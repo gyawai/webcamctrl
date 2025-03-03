@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <unistd.h>
 #include <string.h>
 #include <stdbool.h>
 #include <netdb.h>
@@ -8,7 +9,7 @@
 
 static int send_packet(Pkt *pktp);
 
-SOCKET Soc;
+SOCKET Soc = -1;
 
 void
 pan_relative_c(int val) {
@@ -69,12 +70,31 @@ reset_divelog_c(void) {
     send_packet(&pkt);
 }
 
+/*
+ * At the 1st call, connect to port0 of hostname0
+ *
+ * At the 2nd call and later, try reconnecting to the same destination.
+ * Args hostname0 and port0 are not used.
+ */
 int
-setup_client(char *hostname, in_port_t port)
+setup_client(char *hostname0, in_port_t port0)
 {
     struct hostent *server_ent;
     struct sockaddr_in server;
 
+    static int firstcall = 1;
+    static char hostname[128];
+    static in_port_t port;
+    
+    if (firstcall) {
+        firstcall = 0;
+        strncpy(hostname, hostname0, strlen(hostname));
+        port = port0;
+    }
+    else if (Soc > 0) {
+        close(Soc);
+    }
+    
     fprintf(stderr, "connecting to %s ... ", hostname);
     server_ent = gethostbyname(hostname);
     if (server_ent == NULL) {
