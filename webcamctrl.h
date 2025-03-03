@@ -13,6 +13,7 @@ void server_mainloop(const char *devname, in_port_t tcp_port);
 int setup_server(in_port_t port);
 int setup_client(char *hostname, in_port_t port);
 void reset_divelog_c();
+void reboot_c();
 
 #define INDEV_DEFAULT "key" // or device file name for gamepad e.g. "/dev/input/event19"
 #define OUTDEV_DEFAULT "/dev/obsbot"
@@ -23,6 +24,7 @@ void reset_divelog_c();
 
 typedef struct {
   int reset;
+  int reboot;
 } SensorCmd;
 
 typedef struct {

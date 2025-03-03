@@ -17,6 +17,7 @@ static int recv_packet(SOCKET soc, Pkt *pktp);
 static int xioctl(int fd, int request, void *arg);
 static void move_camera(int fd, int type, int pan, int tilt, int zoom);
 static void reset_divelog(void);
+static void reboot_myself(void);
 
 int
 setup_server(in_port_t port)
@@ -78,6 +79,9 @@ server_mainloop(const char *devname, in_port_t tcp_port) {
   	        fprintf(stderr, "reset?: %d\n", pkt.sensor.reset);
 		if (pkt.sensor.reset == 1) {
 		    reset_divelog();
+		}
+		if (pkt.sensor.reboot == 1) {
+		  reboot_myself();
 		}
 		break;
 
@@ -178,6 +182,9 @@ reset_divelog(void) {
 #endif
 }
 
+static void reboot_myself(void) {
+    system("/usr/sbin/reboot");
+}
 
 static int
 xioctl(int fd, int request, void *arg) {

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include <stdbool.h>
@@ -70,6 +71,17 @@ reset_divelog_c(void) {
     send_packet(&pkt);
 }
 
+void
+reboot_c(void) {
+    Pkt pkt = {
+        .type = 1,
+	.sensor = {
+	    .reboot = 1,
+	}
+    };
+    send_packet(&pkt);
+}
+
 /*
  * At the 1st call, connect to port0 of hostname0
  *
@@ -93,13 +105,14 @@ setup_client(char *hostname0, in_port_t port0)
     }
     else if (Soc > 0) {
         close(Soc);
+	sleep(10);
     }
     fprintf(stderr, "hostname: %s  port: %d\n", hostname, port);
     fprintf(stderr, "connecting to %s ... ", hostname);
     server_ent = gethostbyname(hostname);
     if (server_ent == NULL) {
 	perror("gethostbyname() failed.");
-	return -1;
+	exit(EXIT_FAILURE);
     }
 
     memset((char *)&server, 0, sizeof(server));
@@ -111,12 +124,12 @@ setup_client(char *hostname0, in_port_t port0)
     Soc = socket(AF_INET, SOCK_STREAM, 0);
     if (Soc < 0) {
 	perror("socket() failed.");
-	return -1;
+	exit(EXIT_FAILURE);
     }
 
     if (connect(Soc, (struct sockaddr *)&server, sizeof(server)) == -1) {
 	perror("connect() failed.");
-	return -1;
+	exit(EXIT_FAILURE);
     }
     fprintf(stderr, "connected.\n");
 }

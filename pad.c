@@ -61,8 +61,9 @@ pad_controller(const char *devname) {
 	     */
             if (ev.code == BTN_TL2) zoom_relative_c(-dz);
             if (ev.code == BTN_TR2) zoom_relative_c(dz);
-            if (ev.code == BTN_MODE) setup_client((char *)NULL, (in_port_t)0);
-            if (ev.code == BTN_Z) reset_divelog_c();
+            if (ev.code == BTN_START) setup_client((char *)NULL, (in_port_t)0); // try reconnect
+            if (ev.code == BTN_SELECT) reset_divelog_c(); // clear divelog
+            if (ev.code == BTN_Z) reboot_c(); // reboot the machine on which server is running
             // printf("type: %d  code: %d  value: %d\n", ev.type, ev.code, ev.value);
             break;
 
