@@ -8,5 +8,6 @@ __pycache__/
 *.so
 *.a
 *.o
+*.log
 
 
