@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 connecting to 192.168.0.101 ... connect() failed.: Connection refused
 Open gamepad /dev/input/event6 ... opened.
 indev: /dev/input/event6 (gamepad)
@@ -62973,3 +62974,8 @@ tilt val:4
 tilt val:4
 tilt val:-4
 til
+=======
+Open camera /dev/obsbot ... Opened.
+Listening port 1234 ... Successfully bound.
+Waiting for connection request ...
+>>>>>>> origin/main
