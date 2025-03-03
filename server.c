@@ -160,7 +160,7 @@ move_camera(int fd, int type, int pan, int tilt, int zoom) {
 
 static void
 reset_divelog(void) {
-    fprintf(stderr, "#### reset dive log ####");
+    fprintf(stderr, "#### reset dive log ####\n");
     char *fname = "../streamer/var/depthlog.csv";
 #if 0
     FILE* fp = fopen(fname, "w");
@@ -183,7 +183,9 @@ reset_divelog(void) {
 }
 
 static void reboot_myself(void) {
+    fprintf(stderr, "#### reboot the system! ####\n");
     system("/usr/sbin/reboot");
+    fprintf(stderr, "#### reboot execed. ####\n");
 }
 
 static int
