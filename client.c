@@ -88,13 +88,13 @@ setup_client(char *hostname0, in_port_t port0)
     
     if (firstcall) {
         firstcall = 0;
-        strncpy(hostname, hostname0, strlen(hostname));
+        strncpy(hostname, hostname0, sizeof(hostname));
         port = port0;
     }
     else if (Soc > 0) {
         close(Soc);
     }
-    
+    fprintf(stderr, "hostname: %s  port: %d\n", hostname, port);
     fprintf(stderr, "connecting to %s ... ", hostname);
     server_ent = gethostbyname(hostname);
     if (server_ent == NULL) {
