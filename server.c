@@ -25,6 +25,7 @@ setup_server(in_port_t port)
     struct sockaddr_in me;
     SOCKET soc_waiting;
     SOCKET soc_client;
+    int yes = 1;
 
     memset((char *)&me, 0, sizeof(me));
     me.sin_family = AF_INET;
@@ -36,7 +37,8 @@ setup_server(in_port_t port)
 	perror("socket");
 	return -1;
     }
-
+    setsockopt(soc_waiting, SOL_SOCKET, SO_REUSEADDR, (const char *)&yes, sizeof(yes));
+   
     if (bind(soc_waiting, (struct sockaddr *)&me, sizeof(me)) == -1) {
 	perror("bind");
 	return -1;
@@ -184,7 +186,7 @@ reset_divelog(void) {
 
 static void reboot_myself(void) {
     fprintf(stderr, "#### reboot the system! ####\n");
-    system("/usr/sbin/reboot");
+    system("/usr/bin/sudo /usr/sbin/reboot");
     fprintf(stderr, "#### reboot execed. ####\n");
 }
 
