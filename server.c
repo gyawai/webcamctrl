@@ -18,6 +18,7 @@ static int xioctl(int fd, int request, void *arg);
 static void move_camera(int fd, int type, int pan, int tilt, int zoom);
 static void reset_divelog(void);
 static void reboot_myself(void);
+static void shutdown_myself(void);
 
 int
 setup_server(in_port_t port)
@@ -83,7 +84,8 @@ server_mainloop(const char *devname, in_port_t tcp_port) {
 		    reset_divelog();
 		}
 		if (pkt.sensor.reboot == 1) {
-		  reboot_myself();
+		  // reboot_myself();
+		  shutdown_myself();
 		}
 		break;
 
@@ -188,6 +190,12 @@ static void reboot_myself(void) {
     fprintf(stderr, "#### reboot the system! ####\n");
     system("/usr/bin/sudo /usr/sbin/reboot");
     fprintf(stderr, "#### reboot execed. ####\n");
+}
+
+static void shutdown_myself(void) {
+    fprintf(stderr, "#### shutdown the system! ####\n");
+    system("/usr/bin/sudo /usr/sbin/poweroff");
+    fprintf(stderr, "#### poweroff execed. ####\n");
 }
 
 static int
